@@ -95,7 +95,8 @@ function App() {
       So allowSound is just a primitive value
       so it's just a boolean
       and so therefore that doesn't change across renders.
-      And then the second prop is this setAllowSound function.
+
+      And then the second prop is this setAllowSound function.      
       Now remember that the state setter function
       from useState is actually stable.
       So React guarantees that it doesn't change between renders.
