@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import clickSound from "./ClickSound.m4a";
 
 function Calculator({ workouts, allowSound }) {
@@ -112,6 +112,136 @@ function Calculator({ workouts, allowSound }) {
   );
 
   /////////////////////////////
+  // 1
+  //   So in JavaScript, a closure is basically the fact
+  // that a function captures all the variables
+  // from its Lexile scope.
+  // So from the place that it was defined
+  // at the time that the function was created.
+  // So again, whenever a function is created, it closes
+  // over the effect of that Lexile environment at the time.
+  // And so it'll always have access to the variables
+  // from the place where it was defined.
+  // Now, in React hooks actually rely heavily
+  // on this concept of JavaScript closures
+  // and that is specially true for use effect.
+  // So that's where we mostly see this happening.
+  // And since this is such a great confusion
+  // for many React developers, I wanted to take some time here
+  // to now talk about closures and stale closures
+  // in the use effect hook so that you understand even
+  // better how all of this works.
+  // So this is the type of advanced lecture that you probably
+  // are not gonna find in most other React courses.
+
+  //   So as I mentioned at the beginning of this lecture
+  // this function right here, so by the time
+  // that this function was first created, it closed over the
+  // variable environment that was present
+  // at the time that dysfunction was created.
+  // So that was in the initial render.
+  // So a closure has been created here
+  // at the time that this first render was created
+  // and it closed over the props
+  // and the state in the case of React.
+
+  //   And in React, we can actually also call this current state
+  // and the current props a snapshot.
+  // And so any function that was created at the initial render
+  // and then not recreated, still has access
+  // to that initial snapshot of state and props.
+  // And so that's exactly what we have right here.
+  // So dysfunction is created at the beginning
+  // but then never again.
+  // And so therefore here we now have a closure
+  // with that initial snapshot and with the dependency array
+  // that we have right now, which is basically here
+  // the empty dependency array as this default,
+  // dysfunction will actually never be recreated again.
+  // And so it will never get access
+  // to the current new snapshot, for example, as we change some
+  // of these state variables, for example, this number here.
+  // So if we change the number of exercises as we would expect
+  // it did not change that up here in the title.
+
+  //   But then as we keep changing these values
+  // this effect will not be executed
+  // and we don't get the fresh values inside dysfunction here.
+  // So all of this is to say
+  // that what was created here is what we call a stale closure.
+  // So it's an outdated closure
+  // because the function has captured the values
+  // from a time where the number was still something else.
+  // So where it was still nine.
+  // Now, in the meantime here
+  // it actually re-rendered because I changed some code.
+  // But again, if I change this to something else
+  // here it is still showing the outdated value.
+  // So the value from the closure.
+  // So essentially the effect function can not see all
+  // of these variables here
+  // unless we specify them in the dependency array.
+  /////
+  // useEffect(function () {
+  // console.log(duration, sets);
+  //   document.title = `Your ${number}-exercise workout`;
+  // }, []);
+
+  //////////////////////
+
+  // 2
+  // useEffect(
+  //   function () {
+  //     console.log(duration, sets);
+  //     document.title = `Your ${number}-exercise workout`;
+  //   },
+  //   [number]
+  // );
+
+  //   So let's specify at least the number variable right here.
+  // And so basically specifying a dependency array is a bit
+  // like telling the user facto something like, Hey
+  // I know that you cannot see the current values
+  // in the current render
+  // but I promise that you only need to rerun this
+  // effect whenever number here actually changes
+  // and everything else does not matter to you, right?
+
+  //   then React understands that this number state
+  // here is actually important for this effect.
+  // And so then it'll re-execute it, and by that time
+  // the function can then close over.
+  // So it can then capture the new snapshot.
+  // So basically what the duration, the set and the number are
+  // at the time that this dysfunction is executed again.
+
+  ///////////////////////
+  // 3
+
+  useEffect(
+    function () {
+      console.log(duration, sets);
+      document.title = `Your ${number}-exercise workout`;
+    },
+    [number, duration, sets]
+  );
+  //   So let me now clear this here, and I will now
+  // change the sets to five, enter duration 2, 1 20, let's say.
+  // Then let's change that here.
+  // And then we see that our effect is again,
+  // referencing an old value.
+  // So the duration here is still the duration from before.
+  // And so again, this is here a stale value
+  // now inside the stale closure.
+  // So that's why we really need to define all
+  // of these values in the dependency array.
+
+  //   And so that's then not a stale closure.
+  // So the stale closure only happens if dysfunction
+  // is still referencing some old values that are outdated
+  // by the time that dysfunction is running.
+
+  ///////////////////////////////////////
 
   function handleInc() {
     setDuration((duration) => Math.floor(duration + 1));
