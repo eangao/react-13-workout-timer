@@ -13,17 +13,17 @@ function Calculator({ workouts, allowSound }) {
   const mins = Math.floor(duration);
   const seconds = (duration - mins) * 60;
 
-  const playSound = useCallback(
-    function () {
-      if (!allowSound) return;
+  // const playSound = useCallback(
+  //   function () {
+  //     if (!allowSound) return;
 
-      //     the audio API from the browser.
-      // So this is here just a browser feature.
-      const sound = new Audio(clickSound);
-      sound.play();
-    },
-    [allowSound]
-  );
+  //     //     the audio API from the browser.
+  //     // So this is here just a browser feature.
+  //     const sound = new Audio(clickSound);
+  //     sound.play();
+  //   },
+  //   [allowSound]
+  // );
 
   /////////////////////////////////
   // 2
@@ -45,9 +45,8 @@ function Calculator({ workouts, allowSound }) {
   useEffect(
     function () {
       setDuration((number * sets * speed) / 60 + (sets - 1) * durationBreak);
-      playSound();
     },
-    [number, sets, speed, durationBreak, playSound]
+    [number, sets, speed, durationBreak]
   );
 
   // 3
@@ -76,13 +75,49 @@ function Calculator({ workouts, allowSound }) {
   // then you can do this.
   ////////////////////////////////////
 
+  ////////////////////////
+  //   And so again, this time we were able
+  // to finally move the helper function into the effect.
+  // And so this is also great demonstration
+  // that we should in fact have one effect
+  // for each side effect that we want to have.
+  // Or in other words, this effect here should
+  // only be responsible for setting the duration,
+  // not for setting the duration and playing a sound.
+  // So instead we just create one effect
+  // that is responsible for playing the sound.
+  // And we do that whenever the duration changes.
+  // So here we actually like voluntarily declared
+  // this duration variable in the dependency array,
+  // even though we are not using it anywhere here.
+  // So this is simply to tell the effect that we wanted
+  // to run whenever the duration changes.
+  // And now here we are then missing this reactive value again.
+  // So let's place that here.
+  // And with this, everything should be well.
+  useEffect(
+    function () {
+      const playSound = function () {
+        if (!allowSound) return;
+
+        //     the audio API from the browser.
+        // So this is here just a browser feature.
+        const sound = new Audio(clickSound);
+        sound.play();
+      };
+
+      playSound();
+    },
+    [duration, allowSound]
+  );
+
+  /////////////////////////////
+
   function handleInc() {
     setDuration((duration) => Math.floor(duration + 1));
-    playSound();
   }
   function handleDec() {
     setDuration((duration) => (duration > 1 ? Math.ceil(duration - 1) : 0));
-    playSound();
   }
 
   return (
@@ -184,6 +219,8 @@ function Calculator({ workouts, allowSound }) {
 export default memo(Calculator);
 
 /////////////////////////
+// /PROBLEM
+
 // In this video, we're gonna play a sound
 // whenever the duration state changes.
 // And this will bring up all kinds of interesting issues
@@ -384,3 +421,24 @@ export default memo(Calculator);
 // in the future think about this stuff on your own.
 // So I think that this is really, really important
 // and will make you a better React developer for sure.
+
+////////////////
+// SOLUTION
+// Now, the solution for this problem is
+// to do something completely different.
+// So instead of using useCallback here
+// and instead of playing the sound here and here,
+// we can do something entirely different.
+// So let's think about this.
+// When do we actually want the sound to play?
+// We want it to play whenever the duration changes.
+// So that's why we placed this function in these three places.
+// However, as I just said, there is a better way of doing that
+// and one that is way more clear and more intentional,
+// which is to simply synchronize this side effect
+// of playing the sound with the duration state.
+// So instead of all this that we just did is
+// to create a new separate effect
+// which will be responsible for playing the sound.
+// So basically for keeping the sound synchronized
+// with the duration state.
